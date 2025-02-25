@@ -41,7 +41,7 @@ public class DailyExpenseManager : MonoBehaviour
         foreach (var item in expenseItems)
         {
             item.toggle.onValueChanged.AddListener((isOn) => UpdateExpenses());
-            item.costText.text = $"-{costs[item.type]:F0}₺";
+            item.costText.text = $"-{costs[item.type]:F0} TL";
             item.descriptionText.text = GetExpenseDescription(item.type);
         }
         
@@ -67,9 +67,9 @@ public class DailyExpenseManager : MonoBehaviour
     
     void UpdateUI()
     {
-        currentMoneyText.text = $"Mevcut Para: {gameRules.GetCurrentMoney():F0}₺";
-        salaryText.text = $"Günlük Maaş: {gameRules.GetDailySalary():F0}₺";
-        remainingMoneyText.text = $"Kalan: {remainingMoney:F0}₺";
+        currentMoneyText.text = $"Mevcut Para: {gameRules.GetCurrentMoney():F0} TL";
+        salaryText.text = $"Günlük Maaş: {gameRules.GetDailySalary():F0} TL";
+        remainingMoneyText.text = $"Kalan: {remainingMoney:F0} TL";
         
         // Eğer bütçe eksideyse kırmızı yap ve butonu devre dışı bırak
         Color textColor = remainingMoney < 0 ? Color.red : Color.black;
