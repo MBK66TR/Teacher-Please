@@ -1,22 +1,21 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class BalanceSlider : MonoBehaviour
 {
-    [SerializeField] private Slider balanceSlider;
-    [SerializeField] private TextMeshProUGUI studentValueText;
-    [SerializeField] private TextMeshProUGUI adminValueText;
-    [SerializeField] private Image dangerZoneLeft;
-    [SerializeField] private Image dangerZoneRight;
+    [SerializeField] private Image fillBar; // Dolum görseli
+    [SerializeField] private Image backgroundBar; // Bar arkası
     
     private GameRules gameRules;
-    private float dangerThreshold = 0.2f; // Tehlike bölgesi eşiği (0-1 arası)
     
     void Start()
     {
         gameRules = FindObjectOfType<GameRules>();
-        UpdateUI();
+        
+        // Fill bar'ın ayarlarını yap
+        fillBar.type = Image.Type.Filled;
+        fillBar.fillMethod = Image.FillMethod.Horizontal;
+        fillBar.fillOrigin = (int)Image.OriginHorizontal.Left;
     }
 
     void Update()
@@ -24,22 +23,8 @@ public class BalanceSlider : MonoBehaviour
         float studentValue = gameRules.GetStudentSatisfaction();
         float adminValue = gameRules.GetAdministrationTrust();
         
-        // Slider değerini 0-1 arasına normalize et
+        // Bar'ın doluluk oranını hesapla
         float normalizedBalance = (studentValue - adminValue + 100f) / 200f;
-        balanceSlider.value = normalizedBalance;
-        
-        // Tehlike bölgelerini kontrol et
-        dangerZoneLeft.color = new Color(1, 0, 0, 
-            normalizedBalance < dangerThreshold ? 0.5f : 0f);
-        dangerZoneRight.color = new Color(1, 0, 0, 
-            normalizedBalance > (1 - dangerThreshold) ? 0.5f : 0f);
-        
-        UpdateUI();
-    }
-    
-    private void UpdateUI()
-    {
-        studentValueText.text = $"Öğrenci: {gameRules.GetStudentSatisfaction():F0}";
-        adminValueText.text = $"Yönetim: {gameRules.GetAdministrationTrust():F0}";
+        fillBar.fillAmount = normalizedBalance;
     }
 } 
