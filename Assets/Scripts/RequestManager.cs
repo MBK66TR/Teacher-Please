@@ -23,11 +23,13 @@ public class RequestManager : MonoBehaviour
         if (gameRules.IsGameOver()) return;
         
         currentRequest = requestGenerator.GenerateRandomRequest();
-        UpdateUI(currentRequest);
         
         if (studentManager != null)
         {
-            studentManager.SpawnNewStudent(currentRequest.studentType);
+            // UI'ı öğrenci vardığında güncelle
+            studentManager.SpawnNewStudent(currentRequest.studentType, () => {
+                UpdateUI(currentRequest);
+            });
         }
     }
 
