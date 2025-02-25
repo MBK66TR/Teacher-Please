@@ -7,6 +7,7 @@ public class GameRules : MonoBehaviour
     // Oyuncu durumu
     [SerializeField] private float studentSatisfaction = 50f; // Öğrenci memnuniyeti (0-100)
     [SerializeField] private float administrationTrust = 50f; // Yönetim güveni (0-100)
+    [SerializeField] private GameObject expenseManager;
     
     // Sınırlar
     private const float MIN_THRESHOLD = 10f; // Bu değerin altına düşerse kovulma
@@ -28,17 +29,17 @@ public class GameRules : MonoBehaviour
     // Sabit masraflar
     private Dictionary<ExpenseType, float> expenseCosts = new Dictionary<ExpenseType, float>()
     {
-        { ExpenseType.Rent, 80f },
-        { ExpenseType.Food, 50f },
-        { ExpenseType.Bills, 30f },
-        { ExpenseType.RoomExpenses, 40f }
+        { ExpenseType.Rent, 80f },     // Kira: 80₺
+        { ExpenseType.Food, 50f },     // Yemek: 50₺
+        { ExpenseType.Bills, 30f },    // Faturalar: 30₺
+        { ExpenseType.RoomExpenses, 40f } // Oda giderleri: 40₺
     };
 
     private Dictionary<ExpenseType, bool> activeExpenses = new Dictionary<ExpenseType, bool>();
 
     // Para kazanma oranları
-    private const float PRO_STUDENT_MONEY = 20f;      // Öğrenci yanlısı karar için para
-    private const float PRO_ADMIN_MONEY = 100f;       // Yönetim yanlısı karar için para
+    private const float PRO_STUDENT_MONEY = 50f;      // Öğrenci yanlısı karar: 50₺
+    private const float PRO_ADMIN_MONEY = 100f;       // Yönetim yanlısı karar: 100₺
     
     // Bar değişim oranları
     private const float PRO_STUDENT_BAR_CHANGE = 0.5f;  // Öğrenci yanlısı karar için bar değişimi
@@ -130,7 +131,6 @@ public class GameRules : MonoBehaviour
         
         // Panelleri aç/kapa
         mainPanel.SetActive(false);
-        var expenseManager = FindObjectOfType<DailyExpenseManager>();
         expenseManager.gameObject.SetActive(true);
     }
 

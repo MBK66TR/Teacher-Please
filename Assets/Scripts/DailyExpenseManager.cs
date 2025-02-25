@@ -10,6 +10,7 @@ public class DailyExpenseManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI salaryText;
     [SerializeField] private TextMeshProUGUI remainingMoneyText;
     [SerializeField] private Button confirmButton;
+    [SerializeField] private GameObject mainPanel;
     
     [Header("Expense Items")]
     [SerializeField] private ExpenseItem[] expenseItems;
@@ -98,6 +99,7 @@ public class DailyExpenseManager : MonoBehaviour
         }
         
         gameRules.ProcessDailyExpenses(selectedExpenses);
-        expensePanel.SetActive(false);
+        gameObject.SetActive(false);
+        mainPanel.SetActive(true); // Ana paneli tekrar aç
     }
 } 
