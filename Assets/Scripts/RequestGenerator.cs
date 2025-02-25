@@ -51,30 +51,26 @@ public class RequestGenerator : MonoBehaviour
         ));
     }
 
+    private StudentType GetRandomStudentType()
+    {
+        return (StudentType)Random.Range(0, System.Enum.GetValues(typeof(StudentType)).Length);
+    }
+
     public StudentRequest GenerateRandomRequest()
     {
         RequestType randomType = (RequestType)Random.Range(0, System.Enum.GetValues(typeof(RequestType)).Length);
         string randomName = turkishNames[Random.Range(0, turkishNames.Length)];
+        StudentType studentType = GetRandomStudentType();
         
         var template = requestTemplates[randomType];
-        string description;
-        
-        // LateSubmission için özel durum
-        if (randomType == RequestType.LateSubmission)
-        {
-            string[] contextValues = GetRandomContextForType(randomType).Split('|');
-            description = string.Format(template.descriptionTemplate, contextValues[0], contextValues[1]);
-        }
-        else
-        {
-            description = string.Format(template.descriptionTemplate, GetRandomContextForType(randomType));
-        }
+        string description = string.Format(template.descriptionTemplate, GetRandomContextForType(randomType));
 
         return new StudentRequest(
             randomName,
             template.title,
             description,
             randomType,
+            studentType,
             Random.Range(template.minStudentImpact, template.maxStudentImpact),
             Random.Range(template.minAdminImpact, template.maxAdminImpact)
         );

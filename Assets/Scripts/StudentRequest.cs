@@ -5,20 +5,21 @@ public class StudentRequest
 {
     public string studentName;
     public string requestTitle;
-    public string description;
-    public RequestType type;
+    public string requestDescription;
+    public RequestType requestType;
+    public StudentType studentType;
     public float studentImpact;
-    public float administrationImpact;
+    public float adminImpact;
 
-    public StudentRequest(string name, string title, string desc, RequestType type, 
-        float studentImp, float adminImp)
+    public StudentRequest(string name, string title, string description, RequestType type, StudentType sType, float sImpact, float aImpact)
     {
         studentName = name;
         requestTitle = title;
-        description = desc;
-        this.type = type;
-        studentImpact = studentImp;
-        administrationImpact = adminImp;
+        requestDescription = description;
+        requestType = type;
+        studentType = sType;
+        studentImpact = sImpact;
+        adminImpact = aImpact;
     }
 }
 

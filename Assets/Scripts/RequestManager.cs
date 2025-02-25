@@ -4,44 +4,45 @@ using UnityEngine.UI;
 
 public class RequestManager : MonoBehaviour
 {
+    [SerializeField] private TextMeshProUGUI requestText;
     [SerializeField] private TextMeshProUGUI studentNameText;
-    [SerializeField] private TextMeshProUGUI requestTitleText;
-    [SerializeField] private TextMeshProUGUI descriptionText;
-    [SerializeField] private Button acceptButton;
-    [SerializeField] private Button rejectButton;
+    [SerializeField] private StudentManager studentManager;
+    [SerializeField] private GameRules gameRules;
     
-    private GameRules gameRules;
     private RequestGenerator requestGenerator;
     private StudentRequest currentRequest;
 
     void Start()
     {
-        gameRules = FindObjectOfType<GameRules>();
-        requestGenerator = FindObjectOfType<RequestGenerator>();
-        
-        acceptButton.onClick.AddListener(() => HandleDecision(true));
-        rejectButton.onClick.AddListener(() => HandleDecision(false));
-        
+        requestGenerator = GetComponent<RequestGenerator>();
         GenerateNewRequest();
     }
 
-    void GenerateNewRequest()
+    public void GenerateNewRequest()
     {
         if (gameRules.IsGameOver()) return;
         
         currentRequest = requestGenerator.GenerateRandomRequest();
-        UpdateUI();
+        UpdateUI(currentRequest);
+        
+        if (studentManager != null)
+        {
+            studentManager.SpawnNewStudent(currentRequest.studentType);
+        }
     }
 
-    void UpdateUI()
+    private void UpdateUI(StudentRequest request)
     {
-        studentNameText.text = currentRequest.studentName;
-        requestTitleText.text = currentRequest.requestTitle;
-        descriptionText.text = currentRequest.description;
+        if (requestText != null)
+            requestText.text = request.requestDescription;
+        if (studentNameText != null)
+            studentNameText.text = request.studentName;
     }
 
-    void HandleDecision(bool isProStudent)
+    public void HandleDecision(bool isProStudent)
     {
+        if (currentRequest == null || gameRules.IsGameOver()) return;
+
         gameRules.HandleRequest(isProStudent);
         GenerateNewRequest();
     }
