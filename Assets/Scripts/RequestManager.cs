@@ -8,6 +8,8 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI studentNameText;
     [SerializeField] private StudentManager studentManager;
     [SerializeField] private GameRules gameRules;
+    [SerializeField] private Button acceptButton;
+    [SerializeField] private Button rejectButton;
     
     private RequestGenerator requestGenerator;
     private StudentRequest currentRequest;
@@ -15,6 +17,13 @@ public class RequestManager : MonoBehaviour
     void Start()
     {
         requestGenerator = GetComponent<RequestGenerator>();
+        
+        // Butonlara click event'lerini ekle
+        if (acceptButton != null)
+            acceptButton.onClick.AddListener(HandleAccept);
+        if (rejectButton != null)
+            rejectButton.onClick.AddListener(HandleReject);
+            
         GenerateNewRequest();
     }
 
@@ -39,6 +48,16 @@ public class RequestManager : MonoBehaviour
             requestText.text = request.requestDescription;
         if (studentNameText != null)
             studentNameText.text = request.studentName;
+    }
+
+    public void HandleAccept()
+    {
+        HandleDecision(true);
+    }
+
+    public void HandleReject()
+    {
+        HandleDecision(false);
     }
 
     public void HandleDecision(bool isProStudent)
