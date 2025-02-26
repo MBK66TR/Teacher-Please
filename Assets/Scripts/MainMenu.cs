@@ -58,22 +58,6 @@ public class MainMenu : MonoBehaviour
         creditsPanel?.SetActive(false);
         mainPanel?.SetActive(true);
     }
-    
-        
-    private void SetVolume(float volume)
-    {
-        AudioListener.volume = volume;
-        PlayerPrefs.SetFloat("GameVolume", volume);
-        PlayerPrefs.Save();
-    }
-    
-    private void SetFullscreen(bool isFullscreen)
-    {
-        Screen.fullScreen = isFullscreen;
-        PlayerPrefs.SetInt("Fullscreen", isFullscreen ? 1 : 0);
-        PlayerPrefs.Save();
-    }
-    
     private void QuitGame()
     {
         #if UNITY_EDITOR
