@@ -424,7 +424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4519,6 +4519,8 @@ MonoBehaviour:
   expenseManager: {fileID: 177249359}
   dailySalary: 100
   mainPanel: {fileID: 1567415917}
+  gameOverPanel: {fileID: 0}
+  gameOverText: {fileID: 0}
 --- !u!4 &1974696683
 Transform:
   m_ObjectHideFlags: 0
