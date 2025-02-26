@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameRules : MonoBehaviour
 {
@@ -214,6 +215,11 @@ public class GameRules : MonoBehaviour
     void Update()
     {
         UpdateUI(); // Her frame'de UI'ı güncelle
+    }
+
+    public void ReturnToMainMenu()
+    {
+        SceneManager.LoadScene(0); // Ana menü sahnesi (index 0)
     }
 }
 
