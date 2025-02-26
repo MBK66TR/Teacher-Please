@@ -198,68 +198,11 @@ public class GameRules : MonoBehaviour
         isGameOver = gameOver;
     }
 
-    public void ProcessDailyExpenses(Dictionary<ExpenseType, bool> selectedExpenses)
+    public void ProcessDailyExpenses()
     {
-        float totalExpenses = 0f;
-        activeExpenses = selectedExpenses;
-        
-        // Günlük masrafları hesapla
-        foreach (var expense in expenseCosts)
-        {
-            if (activeExpenses[expense.Key])
-            {
-                totalExpenses += expense.Value;
-            }
-        }
-        
-        // Masrafları direkt paradan düş
-        currentMoney -= totalExpenses;
-        Debug.Log($"Günlük masraflar: {totalExpenses}, Kalan para: {currentMoney}");
-        
-        // Para bitti mi kontrol et
-        if (currentMoney < 0)
-        {
-            GameOver("Para bitti!");
-            return;
-        }
-        
-        // Masrafların etkilerini uygula
-        ApplyExpenseEffects();
-        
-        // UI'ı güncelle
-        UpdateUI();
-    }
-
-    private void ApplyExpenseEffects()
-    {
-        // Seçili olmayan masrafların olumsuz etkileri
-        if (!activeExpenses[ExpenseType.Food])
-        {
-            studentSatisfaction -= 10f;
-            administrationTrust -= 5f;
-        }
-
-        if (!activeExpenses[ExpenseType.Rent])
-        {
-            studentSatisfaction -= 15f;
-            administrationTrust -= 10f;
-        }
-
-        if (!activeExpenses[ExpenseType.Bills])
-        {
-            studentSatisfaction -= 5f;
-            administrationTrust -= 15f;
-        }
-
-        if (!activeExpenses[ExpenseType.RoomExpenses])
-        {
-            studentSatisfaction -= 8f;
-            administrationTrust -= 8f;
-        }
-        
-        // Değerleri sınırla
-        studentSatisfaction = Mathf.Clamp(studentSatisfaction, 0f, 100f);
-        administrationTrust = Mathf.Clamp(administrationTrust, 0f, 100f);
+        // Artık sadece UI'ı kapatıyoruz
+        expenseManager.gameObject.SetActive(false);
+        mainPanel.SetActive(true);
     }
 
     // Yeni getter metodları

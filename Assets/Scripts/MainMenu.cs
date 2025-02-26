@@ -16,6 +16,7 @@ public class MainMenu : MonoBehaviour
     
     [Header("Panel Butonları")]
     [SerializeField] private Button backFromCreditsButton;
+
     private void Start()
     {
         // Ana panel butonları
@@ -26,10 +27,16 @@ public class MainMenu : MonoBehaviour
         if (quitButton != null)
             quitButton.onClick.AddListener(QuitGame);
             
-        // Geri dönüş butonları
+        // Geri dönüş butonu
         if (backFromCreditsButton != null)
+        {
+            backFromCreditsButton.onClick.RemoveAllListeners(); // Önceki dinleyicileri temizle
             backFromCreditsButton.onClick.AddListener(HideCredits);
-            
+        }
+        else
+        {
+            Debug.LogError("Geri dönüş butonu atanmamış!");
+        }
 
         // Başlangıçta sadece ana paneli göster
         ShowMainPanel();
@@ -37,8 +44,23 @@ public class MainMenu : MonoBehaviour
     
     private void ShowMainPanel()
     {
-        mainPanel?.SetActive(true);
-        creditsPanel?.SetActive(false);
+        if (mainPanel != null)
+        {
+            mainPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("Main Panel atanmamış!");
+        }
+
+        if (creditsPanel != null)
+        {
+            creditsPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("Credits Panel atanmamış!");
+        }
     }
     
     private void StartGame()
@@ -49,14 +71,28 @@ public class MainMenu : MonoBehaviour
     
     private void ShowCredits()
     {
-        mainPanel?.SetActive(false);
-        creditsPanel?.SetActive(true);
+        if (mainPanel != null && creditsPanel != null)
+        {
+            mainPanel.SetActive(false);
+            creditsPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("Panel referansları eksik!");
+        }
     }
     
     private void HideCredits()
     {
-        creditsPanel?.SetActive(false);
-        mainPanel?.SetActive(true);
+        if (mainPanel != null && creditsPanel != null)
+        {
+            mainPanel.SetActive(true);
+            creditsPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError("Panel referansları eksik!");
+        }
     }
     private void QuitGame()
     {
