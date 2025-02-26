@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameRules : MonoBehaviour
 {
@@ -46,6 +47,8 @@ public class GameRules : MonoBehaviour
     private const float PRO_ADMIN_BAR_CHANGE = 1.5f;    // Yönetim yanlısı karar için bar değişimi
 
     [SerializeField] private GameObject mainPanel; // Inspector'da atanacak
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private TextMeshProUGUI gameOverText;
 
     // Start is called before the first frame update
     void Start()
@@ -109,18 +112,32 @@ public class GameRules : MonoBehaviour
 
     private void CheckGameOver()
     {
-        if (studentSatisfaction < MIN_THRESHOLD || administrationTrust < MIN_THRESHOLD ||
-            studentSatisfaction > MAX_THRESHOLD || administrationTrust > MAX_THRESHOLD)
-        {
-            GameOver();
-        }
+        string message = "";
+        if (studentSatisfaction < MIN_THRESHOLD)
+            message = "Öğrenci memnuniyeti çok düşük!";
+        else if (administrationTrust < MIN_THRESHOLD)
+            message = "Yönetim güveni çok düşük!";
+        else if (studentSatisfaction > MAX_THRESHOLD)
+            message = "Öğrenci memnuniyeti çok yüksek!";
+        else if (administrationTrust > MAX_THRESHOLD)
+            message = "Yönetim güveni çok yüksek!";
+            
+        if (!string.IsNullOrEmpty(message))
+            GameOver(message);
     }
 
-    private void GameOver()
+    public void GameOver(string message)
     {
         isGameOver = true;
-        Debug.Log($"Oyun Bitti! Gün: {currentDay}");
-        // Burada game over ekranını tetikleyebilirsiniz
+        Debug.Log($"Oyun Bitti! Gün: {currentDay} - Sebep: {message}");
+        
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
+            
+        if (gameOverText != null)
+            gameOverText.text = $"Oyun Bitti!\nGün: {currentDay}\nSebep: {message}";
+            
+        mainPanel.SetActive(false);
     }
 
     private void EndDay()
@@ -169,7 +186,7 @@ public class GameRules : MonoBehaviour
         // Para bitti mi kontrol et
         if (currentMoney < 0)
         {
-            GameOver();
+            GameOver("Para bitti!");
             return;
         }
         

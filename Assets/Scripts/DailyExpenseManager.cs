@@ -17,6 +17,8 @@ public class DailyExpenseManager : MonoBehaviour
     
     private GameRules gameRules;
     private float remainingMoney;
+    private Dictionary<ExpenseType, int> missedExpenseCounts;
+    private const int MAX_MISSED_EXPENSES = 3;
     
     [System.Serializable]
     public class ExpenseItem
@@ -30,6 +32,14 @@ public class DailyExpenseManager : MonoBehaviour
     void Start()
     {
         gameRules = FindObjectOfType<GameRules>();
+        
+        // Sözlüğü başlat
+        missedExpenseCounts = new Dictionary<ExpenseType, int>();
+        foreach (ExpenseType type in System.Enum.GetValues(typeof(ExpenseType)))
+        {
+            missedExpenseCounts[type] = 0;
+        }
+        
         InitializeExpenses();
         confirmButton.onClick.AddListener(ConfirmExpenses);
     }
@@ -42,10 +52,27 @@ public class DailyExpenseManager : MonoBehaviour
         {
             item.toggle.onValueChanged.AddListener((isOn) => UpdateExpenses());
             item.costText.text = $"-{costs[item.type]:F0} TL";
-            item.descriptionText.text = GetExpenseDescription(item.type);
+            UpdateExpenseItemUI(item);
         }
         
         UpdateExpenses();
+    }
+
+    void UpdateExpenseItemUI(ExpenseItem item)
+    {
+        int missedCount = missedExpenseCounts[item.type];
+        
+        // Metin rengini güncelle
+        if (missedCount >= 2)
+        {
+            item.descriptionText.color = Color.red;
+            item.descriptionText.text = $"{GetExpenseDescription(item.type)} (Uyarı: {missedCount} gündür ödenmedi!)";
+        }
+        else
+        {
+            item.descriptionText.color = Color.black;
+            item.descriptionText.text = GetExpenseDescription(item.type);
+        }
     }
     
     void UpdateExpenses()
@@ -96,10 +123,29 @@ public class DailyExpenseManager : MonoBehaviour
         foreach (var item in expenseItems)
         {
             selectedExpenses[item.type] = item.toggle.isOn;
+            
+            if (!item.toggle.isOn)
+            {
+                missedExpenseCounts[item.type]++;
+                
+                if (missedExpenseCounts[item.type] >= MAX_MISSED_EXPENSES)
+                {
+                    string expenseName = GetExpenseDescription(item.type);
+                    gameRules.GameOver($"{expenseName} ödemesi 3 gün üst üste yapılmadı!");
+                    return;
+                }
+            }
+            else
+            {
+                missedExpenseCounts[item.type] = 0;
+            }
+
+            // Her masraf için UI'ı güncelle
+            UpdateExpenseItemUI(item);
         }
         
         gameRules.ProcessDailyExpenses(selectedExpenses);
         expensePanel.SetActive(false);
-        mainPanel.SetActive(true); // Ana paneli tekrar aç
+        mainPanel.SetActive(true);
     }
-} 
+}
