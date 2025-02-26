@@ -110,23 +110,34 @@ public class RequestManager : MonoBehaviour
             case RequestType.SpecialPermission: return "Özel İzin";
             case RequestType.CourseOverload: return "Fazla Ders";
             case RequestType.LateSubmission: return "Geç Teslim";
+            case RequestType.ComplexRequest: return "Karmaşık İstek";
+            case RequestType.GroupPetition: return "Toplu Dilekçe";
+            case RequestType.UnclearSituation: return "Belirsiz Durum";
             default: return "Bilinmeyen";
         }
     }
 
-    public void HandleDecision(bool isProStudent)
+    private void HandleDecision(bool isApproved)
     {
-        if (currentRequest == null || gameRules.IsGameOver() || isWaitingForStudentToLeave) return;
+        if (gameRules != null)
+        {
+            gameRules.SetCurrentRequest(currentRequest);
+            gameRules.HandleRequest(isApproved);
+        }
 
-        gameRules.HandleRequest(isProStudent);
-        
-        // UI'ı gizle
-        HideUI();
-        
         isWaitingForStudentToLeave = true;
-        studentManager.DismissCurrentStudent(() => {
-            isWaitingForStudentToLeave = false;
-            GenerateNewRequest();
-        });
+        SetButtonsInteractable(false);
+
+        if (studentManager != null)
+        {
+            studentManager.DismissCurrentStudent(() => {
+                isWaitingForStudentToLeave = false;
+                GenerateNewRequest();
+            });
+        }
     }
+
+
+    
+
 }

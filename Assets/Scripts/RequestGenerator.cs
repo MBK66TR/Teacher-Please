@@ -61,6 +61,24 @@ public class RequestGenerator : MonoBehaviour
             "Hocam ödevi {0} gün geç teslim etmem mümkün mü? {1}",
             4f, 7f, 3f, 6f
         ));
+
+        requestTemplates.Add(RequestType.ComplexRequest, new RequestTemplate(
+            "Karmaşık İstek",
+            "{0}",
+            8f, 12f, 6f, 10f
+        ));
+
+        requestTemplates.Add(RequestType.GroupPetition, new RequestTemplate(
+            "Toplu Dilekçe",
+            "Bir grup öğrenci {0} konusunda dilekçe verdi. Nasıl yanıtlamak istersiniz?",
+            10f, 15f, 8f, 12f
+        ));
+
+        requestTemplates.Add(RequestType.UnclearSituation, new RequestTemplate(
+            "Belirsiz Durum",
+            "{0}",
+            7f, 13f, 5f, 11f
+        ));
     }
 
     private string GetRandomNameForGender(bool isMale)
@@ -174,6 +192,42 @@ public class RequestGenerator : MonoBehaviour
                     Random.Range(1, 5).ToString(),
                     excuses[Random.Range(0, excuses.Length)]);
             
+            case RequestType.ComplexRequest:
+                string[] complexRequests = {
+                    "Bir öğrenci grubu, final sınavlarının stres seviyesini düşürmek için alternatif değerlendirme yöntemleri öneriyor. Kabul edilirse diğer bölümlerde de emsal oluşturabilir.",
+                    "Engelli bir öğrenci için özel düzenlemeler talep ediliyor, ancak bu düzenlemeler diğer öğrencilerin de faydalanmak isteyebileceği imkanlar içeriyor.",
+                    "Öğrenci konseyi, kampüsteki yemek şirketinin değiştirilmesini talep ediyor. Mevcut şirketle uzun vadeli sözleşme var, ama şikayetler artıyor.",
+                    "Bir grup öğrenci, derslerin %30'unun online yapılmasını öneriyor. Bu değişiklik bazı öğrenciler için avantajlı olacakken, bazıları için dezavantaj oluşturabilir.",
+                    "Uluslararası bir öğrenci değişim programı için kontenjan artırımı isteniyor, ancak bu mevcut öğrencilerin staj imkanlarını etkileyebilir.",
+                    "Öğrenciler, bir hocanın ders anlatım tarzının değişmesi için imza topluyor. Hoca deneyimli ve saygın biri, ama modern öğretim tekniklerine uzak.",
+                    "Bir araştırma projesinde etik ihlal şüphesi var. Projeyi durdurmak prestij kaybına neden olabilir, devam ettirmek ise riskli olabilir.",
+                    "Öğrenci kulüpleri için yeni bir bütçe sistemi öneriliyor, ama bu bazı kulüplerin bütçesinin azalması anlamına geliyor."
+                };
+                return complexRequests[Random.Range(0, complexRequests.Length)];
+
+            case RequestType.GroupPetition:
+                string[] petitionTopics = {
+                    "sınav tarihlerinin değiştirilmesi",
+                    "yeni bir laboratuvar açılması",
+                    "kantindeki fiyatların düşürülmesi",
+                    "kütüphane çalışma saatlerinin uzatılması",
+                    "uzaktan eğitim seçeneği sunulması"
+                };
+                return petitionTopics[Random.Range(0, petitionTopics.Length)];
+
+            case RequestType.UnclearSituation:
+                string[] unclearSituations = {
+                    "Bir grup öğrenci, başka bir öğrencinin sosyal medyada yaptığı paylaşımların rahatsız edici olduğunu söylüyor, ancak ifade özgürlüğü tartışması var.",
+                    "Bir öğrenci, derste verilen projenin telif haklı bir içerik kullandığını iddia ediyor, ama durum belirsiz.",
+                    "Bazı öğrenciler, bir hocanın sınavda bazı öğrencilere ayrıcalık tanıdığını iddia ediyor, ancak somut kanıt yok.",
+                    "Öğrenci kulübünün düzenlediği etkinlikte yaşanan bir tartışma, fakülte içinde gerginlik yaratıyor.",
+                    "Bir öğrenci, mental sağlık sorunları nedeniyle özel muamele talep ediyor, ancak resmi bir rapor henüz yok.",
+                    "Yabancı öğrenciler dil bariyeri nedeniyle bazı derslerde zorlandıklarını söylüyor, ama çözüm karmaşık.",
+                    "Bir grup öğrenci, ders içeriğinin güncel teknolojileri kapsamadığını iddia ediyor, ancak müfredat değişikliği zor.",
+                    "Öğrenciler arasında politik bir tartışma akademik ortamı etkiliyor, müdahale edilmeli mi tartışmalı."
+                };
+                return unclearSituations[Random.Range(0, unclearSituations.Length)];
+
             default:
                 return "";
         }

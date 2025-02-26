@@ -17,17 +17,15 @@ public class DailyExpenseManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dailyIncomeText;
     [SerializeField] private TextMeshProUGUI currentMoneyText;
     [SerializeField] private Slider spendingSlider;
-    [SerializeField] private TextMeshProUGUI spendingAmountText;
-    [SerializeField] private TextMeshProUGUI currentDayText; // Gün sayacı için UI elemanı
+    [SerializeField] private TextMeshProUGUI spendingAmountText; // Gün sayacı için UI elemanı
     
     private float currentMoney = 80f; // Başlangıç parası1
     private float remainingMoney; // Kalan para
     private float dailyIncome;
     private float spendingAmount = 0f;
-    private int currentDay = 1; // Mevcut gün sayacı
     private Dictionary<ExpenseType, int> missedExpenseCounts;
 
-    private const int MAX_MISSED_EXPENSES = 3;
+    private const int MAX_MISSED_EXPENSES = 2;
     
     [System.Serializable]
     public class ExpenseItem
@@ -40,9 +38,6 @@ public class DailyExpenseManager : MonoBehaviour
     
     void Start()
     {
-        currentDay = PlayerPrefs.GetInt("CurrentDay", 1);
-        UpdateDayUI();
-
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnConfirmClicked);
 
@@ -54,7 +49,6 @@ public class DailyExpenseManager : MonoBehaviour
 
         gameRules = FindObjectOfType<GameRules>();
         
-        // Sözlüğü başlat
         missedExpenseCounts = new Dictionary<ExpenseType, int>();
         foreach (ExpenseType type in System.Enum.GetValues(typeof(ExpenseType)))
         {
@@ -63,6 +57,7 @@ public class DailyExpenseManager : MonoBehaviour
         
         InitializeExpenses();
         UpdateMoneyUI();
+
     }
     
     void InitializeExpenses()
@@ -84,10 +79,19 @@ public class DailyExpenseManager : MonoBehaviour
         int missedCount = missedExpenseCounts[item.type];
         
         // Metin rengini güncelle
-        if (missedCount >= 2)
+        if (missedCount >= 1) // İlk günden sonra uyarı
         {
             item.descriptionText.color = Color.red;
             item.descriptionText.text = $"{GetExpenseDescription(item.type)} (Uyarı: {missedCount} gündür ödenmedi!)";
+            
+            // MAX_MISSED_EXPENSES kontrolü
+            if (missedCount >= MAX_MISSED_EXPENSES)
+            {
+                if (gameRules != null)
+                {
+                    gameRules.GameOver($"{GetExpenseDescription(item.type)} {MAX_MISSED_EXPENSES} gün ödenmedi!");
+                }
+            }
         }
         else
         {
@@ -147,16 +151,16 @@ public class DailyExpenseManager : MonoBehaviour
         }
 
         if (dailyIncomeText != null)
-            dailyIncomeText.text = $"Günlük Gelir: +{dailyIncome:F0}₺";
+            dailyIncomeText.text = $"Günlük Maaş: {gameRules.GetDailySalary():F0} TL";
         
         if (currentMoneyText != null)
-            currentMoneyText.text = $"Mevcut Para: {currentMoney:F0}₺";
+            currentMoneyText.text = $"Mevcut Para: {gameRules.GetCurrentMoney():F0} TL";
             
         if (remainingMoneyText != null)
-            remainingMoneyText.text = $"Toplam Para: {totalAvailable:F0}₺";
+            remainingMoneyText.text = $"Kalan Para: {remainingMoney:F0} TL";
 
         if (spendingAmountText != null)
-            spendingAmountText.text = $"Harcama: {spendingAmount:F0}₺";
+            spendingAmountText.text = $"{spendingAmount:F0} TL";
 
         remainingMoney = totalAvailable - spendingAmount;
     }
@@ -167,29 +171,33 @@ public class DailyExpenseManager : MonoBehaviour
         UpdateMoneyUI();
     }
 
-    private void UpdateDayUI()
-    {
-        if (currentDayText != null)
-        {
-            currentDayText.text = $"{currentDay}. Gün";
-        }
-    }
 
     public void OnConfirmClicked()
     {
-        // Harcanan miktarı düş ve kalan parayı güncelle
-        float totalAvailable = currentMoney + dailyIncome;
-        currentMoney = totalAvailable - spendingAmount;
-        spendingAmount = 0f; // Harcama miktarını sıfırla
-
-        // Gün sayacını artır ve kaydet
-        currentDay++;
-        PlayerPrefs.SetInt("CurrentDay", currentDay);
-        PlayerPrefs.Save();
-        UpdateDayUI();
-
+        var costs = gameRules.GetExpenseCosts();
+        
+        // Her expense için kontrol et
+        foreach (var item in expenseItems)
+        {
+            if (!item.toggle.isOn) // Eğer ödeme yapılmadıysa
+            {
+                missedExpenseCounts[item.type]++;
+              // Eğer MAX_MISSED_EXPENSES'e ulaştıysa oyunu bitir
+                if (missedExpenseCounts[item.type] >= MAX_MISSED_EXPENSES)
+                {
+                    gameRules.GameOver($"{GetExpenseDescription(item.type)} {MAX_MISSED_EXPENSES} gün ödenmedi!");
+                    return;
+                }
+            }
+            else
+            {
+                missedExpenseCounts[item.type] = 0;
+            }
+            
+            UpdateExpenseItemUI(item);
+        }
+        
+        // Oyun bitmemişse normal akışa devam et
         gameRules.ProcessDailyExpenses();
-        expensePanel.SetActive(false);
-        mainPanel.SetActive(true);
     }
 }

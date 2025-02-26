@@ -22,13 +22,15 @@ public class StudentRequest
         adminImpact = aImpact;
     }
 }
-
 public enum RequestType
 {
-    GradeAppeal,         // Not itirazı
-    ExtensionRequest,    // Süre uzatma talebi
-    MakeupExam,         // Telafi sınavı
-    SpecialPermission,   // Özel izin
-    CourseOverload,      // Fazla ders alma
-    LateSubmission      // Geç teslim
-} 
+    GradeAppeal,      // Not İtirazı
+    ExtensionRequest, // Süre Uzatma
+    MakeupExam,       // Telafi Sınavı
+    SpecialPermission,// Özel İzin
+    CourseOverload,   // Fazla Ders
+    LateSubmission,   // Geç Teslim
+    ComplexRequest,   // Karmaşık İstek - yeni eklenen
+    GroupPetition,    // Toplu Dilekçe - yeni eklenen
+    UnclearSituation  // Belirsiz Durum - yeni eklenen
+}

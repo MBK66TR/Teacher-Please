@@ -11,6 +11,9 @@ public class GameRules : MonoBehaviour
     [SerializeField] private float studentSatisfaction = 50f; // Öğrenci memnuniyeti (0-100)
     [SerializeField] private float administrationTrust = 50f; // Yönetim güveni (0-100)
     [SerializeField] private GameObject expenseManager;
+
+    [SerializeField] private TextMeshProUGUI currentDayText;
+    
     
     // Sınırlar
     private const float MIN_THRESHOLD = 10f; // Bu değerin altına düşerse kovulma
@@ -32,10 +35,10 @@ public class GameRules : MonoBehaviour
     // Sabit masraflar
     private Dictionary<ExpenseType, float> expenseCosts = new Dictionary<ExpenseType, float>()
     {
-        { ExpenseType.Rent, 45f },      // Kira: 45₺
-        { ExpenseType.Food, 35f },      // Yemek: 35₺
-        { ExpenseType.Bills, 20f },     // Faturalar: 20₺
-        { ExpenseType.RoomExpenses, 20f }  // Oda giderleri: 20₺
+        { ExpenseType.Rent, 45f },      // Kira: 45 TL
+        { ExpenseType.Food, 35f },      // Yemek: 35 TL
+        { ExpenseType.Bills, 20f },     // Faturalar: 20 TL
+        { ExpenseType.RoomExpenses, 20f }  // Oda giderleri: 20 TL
     };
 
     private Dictionary<ExpenseType, bool> activeExpenses = new Dictionary<ExpenseType, bool>();
@@ -57,11 +60,15 @@ public class GameRules : MonoBehaviour
     [SerializeField] private Image studentBarFill;        // Öğrenci memnuniyeti bar fill
     [SerializeField] private Image adminBarFill;          // Yönetim güveni bar fill
 
+    private StudentRequest currentRequest;
+    private RequestManager requestManager;
+
     // Start is called before the first frame update
     void Start()
     {
         InitializeGame();
         SetDailyRequestCount();
+        requestManager = FindObjectOfType<RequestManager>();
         UpdateUI(); // UI'ı başlangıçta güncelle
     }
 
@@ -88,21 +95,20 @@ public class GameRules : MonoBehaviour
     // UI güncelleme fonksiyonu
     private void UpdateUI()
     {
-        Debug.Log($"Öğrenci: {studentSatisfaction}, Yönetim: {administrationTrust}"); // Debug için
 
         // Her bar için ayrı değer
         if (studentBarFill != null)
         {
             float studentValue = studentSatisfaction / 100f;
             studentBarFill.fillAmount = studentValue;
-            Debug.Log($"Öğrenci Bar Değeri: {studentValue}");
+
         }
 
         if (adminBarFill != null)
         {
             float adminValue = administrationTrust / 100f;
             adminBarFill.fillAmount = adminValue;
-            Debug.Log($"Yönetim Bar Değeri: {adminValue}");
+
         }
     }
 
@@ -113,30 +119,77 @@ public class GameRules : MonoBehaviour
         float moneyGain = isProStudent ? PRO_STUDENT_MONEY : PRO_ADMIN_MONEY;
         currentMoney += moneyGain;
 
-        // Öğrenci yanlısı karar
-        if (isProStudent)
+        switch (currentRequest.requestType)
         {
-            studentSatisfaction += Random.Range(5f, 8f);    // Öğrenci memnuniyeti artar (10-20'den 5-8'e)
-            administrationTrust -= Random.Range(6f, 10f);   // Yönetim güveni düşer (15-25'ten 6-10'a)
-        }
-        // Yönetim yanlısı karar
-        else
-        {
-            studentSatisfaction -= Random.Range(6f, 10f);   // Öğrenci memnuniyeti düşer (15-25'ten 6-10'a)
-            administrationTrust += Random.Range(5f, 8f);    // Yönetim güveni artar (10-20'den 5-8'e)
+            case RequestType.ComplexRequest:
+                HandleComplexRequest(isProStudent);
+                break;
+            case RequestType.GroupPetition:
+                HandleGroupPetition(isProStudent);
+                break;
+            case RequestType.UnclearSituation:
+                HandleUnclearSituation(isProStudent);
+                break;
+            default:
+                // Normal istekler için mevcut mantık
+                if (isProStudent)
+                {
+                    studentSatisfaction += Random.Range(5f, 8f);
+                    administrationTrust -= Random.Range(6f, 10f);
+                }
+                else
+                {
+                    studentSatisfaction -= Random.Range(6f, 10f);
+                    administrationTrust += Random.Range(5f, 8f);
+                }
+                break;
         }
 
         // Değerleri sınırla
         studentSatisfaction = Mathf.Clamp(studentSatisfaction, 0f, 100f);
         administrationTrust = Mathf.Clamp(administrationTrust, 0f, 100f);
 
-        UpdateUI(); // UI'ı güncelle
+        UpdateUI();
         CheckGameOver();
         requestsHandledToday++;
         
         if (requestsHandledToday >= todayMaxRequests)
         {
             EndDay();
+        }
+    }
+
+    private void HandleGroupPetition(bool isApproved)
+    {
+        float baseEffect = Random.Range(10f, 20f);
+        float randomFactor = Random.Range(-5f, 5f);
+        
+        if (isApproved)
+        {
+            studentSatisfaction += baseEffect + randomFactor;
+            administrationTrust -= (baseEffect - randomFactor) * 0.7f;
+            currentMoney -= Random.Range(20f, 50f); // Grup talepleri genelde masraflı
+        }
+        else
+        {
+            studentSatisfaction -= baseEffect - randomFactor;
+            administrationTrust += (baseEffect + randomFactor) * 0.5f;
+        }
+    }
+
+    private void HandleUnclearSituation(bool isApproved)
+    {
+        float randomEffect = Random.Range(-15f, 15f);
+        
+        if (isApproved)
+        {
+            studentSatisfaction += Random.Range(-5f, 20f);
+            administrationTrust += Random.Range(-10f, 10f) + randomEffect;
+        }
+        else
+        {
+            studentSatisfaction += Random.Range(-10f, 5f);
+            administrationTrust += Random.Range(-5f, 15f) - randomEffect;
         }
     }
 
@@ -173,6 +226,7 @@ public class GameRules : MonoBehaviour
     private void EndDay()
     {
         currentDay++;
+        UpdateDayUI();
         requestsHandledToday = 0;
         SetDailyRequestCount();
         
@@ -221,6 +275,69 @@ public class GameRules : MonoBehaviour
     {
         SceneManager.LoadScene(0); // Ana menü sahnesi (index 0)
     }
+
+    private string GenerateComplexRequest()
+    {
+        string[] requests = {
+            "Bir grup öğrenci ders programında değişiklik istiyor, ancak bu değişiklik başka bir grubun programını etkileyebilir.",
+            "Öğrenci kulübü yeni bir etkinlik öneriyor, ama etkinliğin detayları tam net değil.",
+            "Bir öğrenci araştırma projesi için ekstra kaynak talep ediyor, ancak projenin başarı şansı belirsiz.",
+            "Bazı öğrenciler yeni bir ders açılmasını istiyor, fakat dersin içeriği ve yararı tartışmalı.",
+            "Bir öğrenci yurtdışı değişim programına katılmak istiyor, ancak akademik geçmişi karışık."
+        };
+        
+        return requests[Random.Range(0, requests.Length)];
+    }
+
+    public void HandleComplexRequest(bool isApproved)
+    {
+        float randomFactor = Random.Range(-10f, 10f);
+        
+        if (isApproved)
+        {
+            // Onaylandığında bile sonuç belirsiz
+            studentSatisfaction += Random.Range(0f, 15f) + randomFactor;
+            administrationTrust += Random.Range(-5f, 10f) - randomFactor;
+        }
+        else
+        {
+            // Reddedildiğinde bile beklenmedik sonuçlar
+            studentSatisfaction += Random.Range(-10f, 5f) + randomFactor;
+            administrationTrust += Random.Range(-5f, 15f) - randomFactor;
+        }
+        
+        // Bazen ekstra olaylar tetiklenebilir
+        if (Random.value > 0.7f)
+        {
+            TriggerRandomEvent();
+        }
+    }
+
+    private void TriggerRandomEvent()
+    {
+        string[] events = {
+            "Öğrenciler sosyal medyada kararınızı tartışıyor!",
+            "Diğer fakülteler benzer talepler getirmeye başladı.",
+            "Kararınız yerel basında haber oldu.",
+            "Mezunlar derneği konuyla ilgili görüş bildirdi."
+        };
+        
+        Debug.Log(events[Random.Range(0, events.Length)]);
+        // Bu olayların etkilerini de ekleyebiliriz
+    }
+
+    public void SetCurrentRequest(StudentRequest request)
+    {
+        currentRequest = request;
+    }
+
+        private void UpdateDayUI()
+    {
+        if (currentDayText != null)
+        {
+            currentDayText.text = $"{GetCurrentDay()}. Gün";
+        }
+    }
 }
 
 public enum ExpenseType
@@ -230,3 +347,4 @@ public enum ExpenseType
     Bills,          // Faturalar
     RoomExpenses    // Oda giderleri
 }
+
