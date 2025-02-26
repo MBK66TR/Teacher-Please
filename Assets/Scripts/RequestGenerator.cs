@@ -3,7 +3,19 @@ using System.Collections.Generic;
 
 public class RequestGenerator : MonoBehaviour
 {
-    private string[] turkishNames = { "Ahmet", "Mehmet", "Ayşe", "Fatma", "Can", "Deniz", "Ece", "Burak" };
+    private string[] maleNames = { 
+        "Ahmet", "Mehmet", "Can", "Burak", "Ali", "Mustafa", "Emre", "Yusuf", 
+        "Eren", "Murat", "Kemal", "Serkan", "Hakan", "Ozan", "Cem" 
+    };
+    
+    private string[] femaleNames = { 
+        "Ayşe", "Fatma", "Ece", "Zeynep", "Elif", "Merve", "Selin", "Deniz", 
+        "Melis", "Ceren", "Yağmur", "Esra", "Büşra", "Gizem", "Aslı" 
+    };
+    
+    private string[] unisexNames = {
+        "Deniz", "Ege", "Özgür", "Barış", "Kaya", "Yağız", "Toprak"
+    };
     
     private Dictionary<RequestType, RequestTemplate> requestTemplates = new Dictionary<RequestType, RequestTemplate>();
 
@@ -51,16 +63,55 @@ public class RequestGenerator : MonoBehaviour
         ));
     }
 
-    private StudentType GetRandomStudentType()
+    private string GetRandomNameForGender(bool isMale)
     {
-        return (StudentType)Random.Range(0, System.Enum.GetValues(typeof(StudentType)).Length);
+        float randomValue = Random.value;
+        
+        // %10 şansla unisex isim seç
+        if (randomValue < 0.1f)
+        {
+            return unisexNames[Random.Range(0, unisexNames.Length)];
+        }
+        
+        // %90 şansla cinsiyete uygun isim seç
+        if (isMale)
+        {
+            return maleNames[Random.Range(0, maleNames.Length)];
+        }
+        else
+        {
+            return femaleNames[Random.Range(0, femaleNames.Length)];
+        }
+    }
+
+    private StudentType GetRandomStudentTypeForGender(bool isMale)
+    {
+        // Öğrenci tiplerini cinsiyete göre grupla
+        StudentType[] types = isMale ? 
+            new StudentType[] { 
+                StudentType.MaleRegular, 
+                StudentType.MaleNerd, 
+                StudentType.MaleAthlete, 
+                StudentType.MaleRebel, 
+                StudentType.MaleRich 
+            } :
+            new StudentType[] { 
+                StudentType.FemaleRegular, 
+                StudentType.FemaleNerd, 
+                StudentType.FemaleAthlete, 
+                StudentType.FemaleRebel, 
+                StudentType.FemaleRich 
+            };
+            
+        return types[Random.Range(0, types.Length)];
     }
 
     public StudentRequest GenerateRandomRequest()
     {
         RequestType randomType = (RequestType)Random.Range(0, System.Enum.GetValues(typeof(RequestType)).Length);
-        string randomName = turkishNames[Random.Range(0, turkishNames.Length)];
-        StudentType studentType = GetRandomStudentType();
+        bool isMale = Random.value > 0.5f; // %50 şansla erkek/kadın
+        string randomName = GetRandomNameForGender(isMale);
+        StudentType studentType = GetRandomStudentTypeForGender(isMale);
         
         var template = requestTemplates[randomType];
         string description;
