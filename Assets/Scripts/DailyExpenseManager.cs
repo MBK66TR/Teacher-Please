@@ -99,7 +99,7 @@ public class DailyExpenseManager : MonoBehaviour
         }
         
         gameRules.ProcessDailyExpenses(selectedExpenses);
-        gameObject.SetActive(false);
+        expensePanel.SetActive(false);
         mainPanel.SetActive(true); // Ana paneli tekrar aç
     }
 } 

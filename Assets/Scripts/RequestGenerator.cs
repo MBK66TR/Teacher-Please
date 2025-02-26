@@ -63,7 +63,18 @@ public class RequestGenerator : MonoBehaviour
         StudentType studentType = GetRandomStudentType();
         
         var template = requestTemplates[randomType];
-        string description = string.Format(template.descriptionTemplate, GetRandomContextForType(randomType));
+        string description;
+        
+        // LateSubmission için özel işlem
+        if (randomType == RequestType.LateSubmission)
+        {
+            string[] contextValues = GetRandomContextForType(randomType).Split('|');
+            description = string.Format(template.descriptionTemplate, contextValues[0], contextValues[1]);
+        }
+        else
+        {
+            description = string.Format(template.descriptionTemplate, GetRandomContextForType(randomType));
+        }
 
         return new StudentRequest(
             randomName,
