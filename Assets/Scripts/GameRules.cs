@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class GameRules : MonoBehaviour
 {
@@ -24,37 +25,43 @@ public class GameRules : MonoBehaviour
     private bool isGameOver = false;
 
     // Ekonomi sistemi
-    [SerializeField] private float dailySalary = 100f;
-    private float currentMoney = 0f;
+    [SerializeField] private float dailySalary = 100f;  // Günlük maaş
+    private float currentMoney = 200f;  // Başlangıç parası (2 günlük masraf karşılığı)
     
     // Sabit masraflar
     private Dictionary<ExpenseType, float> expenseCosts = new Dictionary<ExpenseType, float>()
     {
-        { ExpenseType.Rent, 80f },     // Kira: 80₺
-        { ExpenseType.Food, 50f },     // Yemek: 50₺
-        { ExpenseType.Bills, 30f },    // Faturalar: 30₺
-        { ExpenseType.RoomExpenses, 40f } // Oda giderleri: 40₺
+        { ExpenseType.Rent, 45f },      // Kira: 45₺
+        { ExpenseType.Food, 35f },      // Yemek: 35₺
+        { ExpenseType.Bills, 20f },     // Faturalar: 20₺
+        { ExpenseType.RoomExpenses, 20f }  // Oda giderleri: 20₺
     };
 
     private Dictionary<ExpenseType, bool> activeExpenses = new Dictionary<ExpenseType, bool>();
 
     // Para kazanma oranları
-    private const float PRO_STUDENT_MONEY = 50f;      // Öğrenci yanlısı karar: 50₺
-    private const float PRO_ADMIN_MONEY = 100f;       // Yönetim yanlısı karar: 100₺
+    private const float PRO_STUDENT_MONEY = 10f;      // Öğrenci yanlısı karar: 10₺
+    private const float PRO_ADMIN_MONEY = 20f;       // Yönetim yanlısı karar: 20₺
     
     // Bar değişim oranları
-    private const float PRO_STUDENT_BAR_CHANGE = 0.5f;  // Öğrenci yanlısı karar için bar değişimi
-    private const float PRO_ADMIN_BAR_CHANGE = 1.5f;    // Yönetim yanlısı karar için bar değişimi
+    private const float PRO_STUDENT_BAR_CHANGE = 1f;     // Öğrenci yanlısı karar için bar değişimi
+    private const float PRO_ADMIN_BAR_CHANGE = 1f;       // Yönetim yanlısı karar için bar değişimi
 
     [SerializeField] private GameObject mainPanel; // Inspector'da atanacak
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI gameOverText;
+
+    // UI Referansları
+    [Header("Bar UI Elemanları")]
+    [SerializeField] private Image studentBarFill;        // Öğrenci memnuniyeti bar fill
+    [SerializeField] private Image adminBarFill;          // Yönetim güveni bar fill
 
     // Start is called before the first frame update
     void Start()
     {
         InitializeGame();
         SetDailyRequestCount();
+        UpdateUI(); // UI'ı başlangıçta güncelle
     }
 
     void InitializeGame()
@@ -63,7 +70,7 @@ public class GameRules : MonoBehaviour
         administrationTrust = 50f;
         currentDay = 1;
         isGameOver = false;
-        currentMoney = dailySalary; // Başlangıç parası
+        currentMoney = 200f; // Başlangıç parası (2 günlük masraf karşılığı)
 
         // Masrafları başlat
         foreach (ExpenseType expense in System.Enum.GetValues(typeof(ExpenseType)))
@@ -77,6 +84,27 @@ public class GameRules : MonoBehaviour
         todayMaxRequests = Random.Range(MIN_REQUESTS_PER_DAY, MAX_REQUESTS_PER_DAY + 1);
     }
 
+    // UI güncelleme fonksiyonu
+    private void UpdateUI()
+    {
+        Debug.Log($"Öğrenci: {studentSatisfaction}, Yönetim: {administrationTrust}"); // Debug için
+
+        // Her bar için ayrı değer
+        if (studentBarFill != null)
+        {
+            float studentValue = studentSatisfaction / 100f;
+            studentBarFill.fillAmount = studentValue;
+            Debug.Log($"Öğrenci Bar Değeri: {studentValue}");
+        }
+
+        if (adminBarFill != null)
+        {
+            float adminValue = administrationTrust / 100f;
+            adminBarFill.fillAmount = adminValue;
+            Debug.Log($"Yönetim Bar Değeri: {adminValue}");
+        }
+    }
+
     public void HandleRequest(bool isProStudent)
     {
         if (isGameOver) return;
@@ -87,20 +115,21 @@ public class GameRules : MonoBehaviour
         // Öğrenci yanlısı karar
         if (isProStudent)
         {
-            studentSatisfaction += Random.Range(5f, 10f) * PRO_STUDENT_BAR_CHANGE;
-            administrationTrust -= Random.Range(3f, 8f) * PRO_STUDENT_BAR_CHANGE;
+            studentSatisfaction += Random.Range(5f, 8f);    // Öğrenci memnuniyeti artar (10-20'den 5-8'e)
+            administrationTrust -= Random.Range(6f, 10f);   // Yönetim güveni düşer (15-25'ten 6-10'a)
         }
         // Yönetim yanlısı karar
         else
         {
-            studentSatisfaction -= Random.Range(3f, 8f) * PRO_ADMIN_BAR_CHANGE;
-            administrationTrust += Random.Range(5f, 10f) * PRO_ADMIN_BAR_CHANGE;
+            studentSatisfaction -= Random.Range(6f, 10f);   // Öğrenci memnuniyeti düşer (15-25'ten 6-10'a)
+            administrationTrust += Random.Range(5f, 8f);    // Yönetim güveni artar (10-20'den 5-8'e)
         }
 
         // Değerleri sınırla
         studentSatisfaction = Mathf.Clamp(studentSatisfaction, 0f, 100f);
         administrationTrust = Mathf.Clamp(administrationTrust, 0f, 100f);
 
+        UpdateUI(); // UI'ı güncelle
         CheckGameOver();
         requestsHandledToday++;
         
@@ -146,8 +175,11 @@ public class GameRules : MonoBehaviour
         requestsHandledToday = 0;
         SetDailyRequestCount();
         
-        // Panelleri aç/kapa
-        mainPanel.SetActive(false);
+        // Yeni güne başlarken maaşı ekle
+        currentMoney += dailySalary;
+        Debug.Log($"Yeni gün başladı. Maaş eklendi. Toplam para: {currentMoney}");
+        
+        // Sadece expense panelini aç
         expenseManager.gameObject.SetActive(true);
     }
 
@@ -171,6 +203,7 @@ public class GameRules : MonoBehaviour
         float totalExpenses = 0f;
         activeExpenses = selectedExpenses;
         
+        // Günlük masrafları hesapla
         foreach (var expense in expenseCosts)
         {
             if (activeExpenses[expense.Key])
@@ -179,9 +212,9 @@ public class GameRules : MonoBehaviour
             }
         }
         
-        // Maaşı ekle ve masrafları düş
-        currentMoney += dailySalary;
+        // Masrafları direkt paradan düş
         currentMoney -= totalExpenses;
+        Debug.Log($"Günlük masraflar: {totalExpenses}, Kalan para: {currentMoney}");
         
         // Para bitti mi kontrol et
         if (currentMoney < 0)
@@ -192,6 +225,9 @@ public class GameRules : MonoBehaviour
         
         // Masrafların etkilerini uygula
         ApplyExpenseEffects();
+        
+        // UI'ı güncelle
+        UpdateUI();
     }
 
     private void ApplyExpenseEffects()
@@ -208,6 +244,18 @@ public class GameRules : MonoBehaviour
             studentSatisfaction -= 15f;
             administrationTrust -= 10f;
         }
+
+        if (!activeExpenses[ExpenseType.Bills])
+        {
+            studentSatisfaction -= 5f;
+            administrationTrust -= 15f;
+        }
+
+        if (!activeExpenses[ExpenseType.RoomExpenses])
+        {
+            studentSatisfaction -= 8f;
+            administrationTrust -= 8f;
+        }
         
         // Değerleri sınırla
         studentSatisfaction = Mathf.Clamp(studentSatisfaction, 0f, 100f);
@@ -222,7 +270,7 @@ public class GameRules : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        UpdateUI(); // Her frame'de UI'ı güncelle
     }
 }
 
