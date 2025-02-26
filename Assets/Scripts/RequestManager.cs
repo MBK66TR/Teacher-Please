@@ -10,6 +10,10 @@ public class RequestManager : MonoBehaviour
     [SerializeField] private GameRules gameRules;
     [SerializeField] private Button acceptButton;
     [SerializeField] private Button rejectButton;
+    
+    [Header("UI Panelleri")]
+    [SerializeField] private GameObject requestPanel; // İstek açıklamasının olduğu panel
+    [SerializeField] private GameObject namePanel;    // İsim paneli
 
     private RequestGenerator requestGenerator;
     private StudentRequest currentRequest;
@@ -24,12 +28,36 @@ public class RequestManager : MonoBehaviour
         if (rejectButton != null)
             rejectButton.onClick.AddListener(HandleReject);
             
+        // Başlangıçta panelleri gizle
+        HideUI();
+        
         GenerateNewRequest();
+    }
+
+    private void HideUI()
+    {
+        if (requestPanel != null)
+            requestPanel.SetActive(false);
+        if (namePanel != null)
+            namePanel.SetActive(false);
+        SetButtonsInteractable(false);
+    }
+
+    private void ShowUI()
+    {
+        if (requestPanel != null)
+            requestPanel.SetActive(true);
+        if (namePanel != null)
+            namePanel.SetActive(true);
+        SetButtonsInteractable(true);
     }
 
     public void GenerateNewRequest()
     {
         if (gameRules.IsGameOver() || isWaitingForStudentToLeave) return;
+        
+        // UI'ı gizle
+        HideUI();
         
         currentRequest = requestGenerator.GenerateRandomRequest();
         
@@ -37,6 +65,7 @@ public class RequestManager : MonoBehaviour
         {
             studentManager.SpawnNewStudent(currentRequest.studentType, () => {
                 UpdateUI(currentRequest);
+                ShowUI(); // Öğrenci yerine geldiğinde UI'ı göster
             });
         }
     }
@@ -51,8 +80,6 @@ public class RequestManager : MonoBehaviour
         
         if (studentNameText != null)
             studentNameText.text = request.studentName;
-            
-        SetButtonsInteractable(true);
     }
 
     private void SetButtonsInteractable(bool interactable)
@@ -93,7 +120,8 @@ public class RequestManager : MonoBehaviour
 
         gameRules.HandleRequest(isProStudent);
         
-        SetButtonsInteractable(false);
+        // UI'ı gizle
+        HideUI();
         
         isWaitingForStudentToLeave = true;
         studentManager.DismissCurrentStudent(() => {
