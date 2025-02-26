@@ -410,7 +410,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &177249360
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4473,6 +4473,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d29afdfb181d2db4584b0087f48152b1, type: 3}
   - {fileID: 21300000, guid: ec676f949efbe0345a910f2e2169e8f4, type: 3}
   yPosition: 0
+  doorSound: {fileID: 8300000, guid: 660f3a366c83157459b4410a7723cc98, type: 3}
+  soundVolume: 1
 --- !u!4 &1867144635
 Transform:
   m_ObjectHideFlags: 0
@@ -4846,8 +4848,8 @@ MonoBehaviour:
   gameRules: {fileID: 1974696682}
   acceptButton: {fileID: 615057483}
   rejectButton: {fileID: 867646348}
-  requestPanel: {fileID: 0}
-  namePanel: {fileID: 0}
+  requestPanel: {fileID: 454228581}
+  namePanel: {fileID: 792609997}
 --- !u!114 &1974696685
 MonoBehaviour:
   m_ObjectHideFlags: 0

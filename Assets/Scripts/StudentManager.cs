@@ -8,10 +8,23 @@ public class StudentManager : MonoBehaviour
     [SerializeField] private Sprite[] femaleStudentSprites; // Kız öğrenci sprite'ları
     [SerializeField] private float yPosition = 0f;
     
+    [Header("Ses Efektleri")]
+    [SerializeField] private AudioClip doorSound;
+    [SerializeField] [Range(0f, 1f)] private float soundVolume = 0.5f;
+    
     private StudentMovement currentStudent;
     private Action onStudentArrived;
     private Action onStudentLeft;
     private bool isDismissing = false;
+    private AudioSource audioSource;
+    
+    private void Awake()
+    {
+        // Ses kaynağını oluştur
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.volume = soundVolume;
+    }
     
     public void SpawnNewStudent(StudentType type, Action onArrived)
     {
@@ -20,6 +33,12 @@ public class StudentManager : MonoBehaviour
         {
             Debug.LogWarning("Öğrenci çıkış yaparken yeni öğrenci oluşturulamaz!");
             return;
+        }
+        
+        // Kapı sesini çal
+        if (doorSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(doorSound);
         }
         
         // Yeni öğrenciyi spawn et
@@ -56,6 +75,12 @@ public class StudentManager : MonoBehaviour
             isDismissing = true;
             onStudentLeft = onLeft;
             
+            // Kapı sesini çal
+            if (doorSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(doorSound);
+            }
+            
             currentStudent.onLeft.AddListener(() => {
                 if (currentStudent != null)
                 {
@@ -71,6 +96,16 @@ public class StudentManager : MonoBehaviour
         else
         {
             onLeft?.Invoke();
+        }
+    }
+    
+    // Ses seviyesini ayarlamak için public metod
+    public void SetSoundVolume(float volume)
+    {
+        soundVolume = Mathf.Clamp01(volume);
+        if (audioSource != null)
+        {
+            audioSource.volume = soundVolume;
         }
     }
 } 
